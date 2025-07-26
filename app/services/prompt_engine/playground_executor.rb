@@ -22,6 +22,26 @@ module PromptEngine
       # Replace parameters in prompt content
       parser = ParameterParser.new(prompt.content)
       processed_content = parser.replace_parameters(parameters)
+      
+      # Create usage record
+      usage = ObservabilityService.log_usage(
+        prompt: prompt,
+        version: prompt.current_version,
+        parameters: parameters,
+        rendered_content: processed_content,
+        rendered_system_message: prompt.system_message,
+        metadata: { source: "playground" }
+      )
+      
+      # Create execution record
+      execution = ObservabilityService.log_execution(
+        usage: usage,
+        provider: provider,
+        model: MODELS[provider],
+        temperature: prompt.temperature,
+        max_tokens: prompt.max_tokens,
+        messages: build_messages(processed_content)
+      )
 
       # Configure RubyLLM with the appropriate API key
       configure_ruby_llm
@@ -55,11 +75,19 @@ module PromptEngine
       end
 
       # Try to get token count if available
-      token_count = if response.respond_to?(:input_tokens) && response.respond_to?(:output_tokens)
-                      (response.input_tokens || 0) + (response.output_tokens || 0)
-      else
-                      0 # Default if token information isn't available
-      end
+      input_tokens = response.respond_to?(:input_tokens) ? response.input_tokens : nil
+      output_tokens = response.respond_to?(:output_tokens) ? response.output_tokens : nil
+      token_count = ((input_tokens || 0) + (output_tokens || 0))
+      
+      # Update execution with response
+      ObservabilityService.update_execution(execution, {
+        content: response_content,
+        input_tokens: input_tokens,
+        output_tokens: output_tokens,
+        total_tokens: token_count,
+        execution_time_ms: execution_time * 1000,
+        metadata: { playground: true }
+      })
 
       {
         response: response_content,
@@ -69,6 +97,7 @@ module PromptEngine
         provider: provider
       }
     rescue StandardError => e
+      ObservabilityService.log_execution_error(execution, e) if execution
       handle_error(e)
     end
 
@@ -119,6 +148,13 @@ module PromptEngine
           raise "An error occurred: #{error.message}"
         end
       end
+    end
+    
+    def build_messages(content)
+      messages = []
+      messages << { role: "system", content: prompt.system_message } if prompt.system_message.present?
+      messages << { role: "user", content: content }
+      messages
     end
   end
 end

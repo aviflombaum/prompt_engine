@@ -121,3 +121,6 @@ completed_run = PromptEngine::EvalRun.create!(
 puts "Created #{PromptEngine::EvalSet.count} evaluation sets"
 puts "Created #{PromptEngine::TestCase.count} test cases"
 puts "Created #{PromptEngine::EvalRun.count} sample eval runs"
+
+# Load cost configurations
+load Rails.root.join("../../db/seeds/cost_configs.rb")
