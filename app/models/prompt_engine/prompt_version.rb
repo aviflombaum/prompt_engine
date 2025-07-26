@@ -5,6 +5,7 @@ module PromptEngine
     belongs_to :prompt, class_name: "PromptEngine::Prompt", counter_cache: :versions_count
     has_many :playground_run_results, class_name: "PromptEngine::PlaygroundRunResult", dependent: :destroy
     has_many :eval_runs, class_name: "PromptEngine::EvalRun", dependent: :destroy
+    has_many :usages, class_name: "PromptEngine::Usage", dependent: :destroy
 
     validates :version_number, presence: true,
               numericality: { greater_than: 0 },

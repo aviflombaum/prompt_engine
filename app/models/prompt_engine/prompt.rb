@@ -11,6 +11,9 @@ module PromptEngine
     has_many :eval_sets,
              class_name: "PromptEngine::EvalSet",
              dependent: :destroy
+    has_many :usages,
+             class_name: "PromptEngine::Usage",
+             dependent: :destroy
 
     attr_accessor :change_summary
 
