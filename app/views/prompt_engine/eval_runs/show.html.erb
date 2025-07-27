@@ -105,11 +105,7 @@
     </div>
   </div>
   
-  <script>
-    setTimeout(function() {
-      location.reload();
-    }, 3000);
-  </script>
+  <div data-controller="auto-refresh" data-auto-refresh-interval-value="3000"></div>
 <% elsif @eval_run.status == 'running' %>
   <div class="card mb-lg">
     <div class="card__body">
@@ -130,11 +126,7 @@
     </div>
   </div>
   
-  <script>
-    setTimeout(function() {
-      location.reload();
-    }, 5000);
-  </script>
+  <div data-controller="auto-refresh" data-auto-refresh-interval-value="5000"></div>
 <% elsif @eval_run.status == 'failed' %>
   <div class="card mb-lg">
     <div class="card__body">

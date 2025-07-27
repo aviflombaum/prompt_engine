@@ -7,7 +7,9 @@
 
 <div class="card">
   <div class="card__body">
-    <%= form_with model: [@prompt, @eval_set], url: prompt_eval_sets_path(@prompt), local: true do |form| %>
+    <div data-controller="config-toggler"
+         data-config-toggler-config-mapping-value='<%= {"regex": ["grader-config-fields", "regex-config"], "json_schema": ["grader-config-fields", "json-schema-config"]}.to_json %>'>
+      <%= form_with model: [@prompt, @eval_set], url: prompt_eval_sets_path(@prompt), local: true do |form| %>
       <%= render 'prompt_engine/shared/form_errors', object: @eval_set %>
 
       <div class="form__group">
@@ -37,15 +39,15 @@
         <%= form.select :grader_type,
             options_for_select(PromptEngine::EvalSet::GRADER_TYPES.map { |k, v| [v, k] }, @eval_set.grader_type || 'exact_match'),
             { include_blank: false },
-            { class: "form__input", id: "grader-type-select",
-              data: { controller: "grader-config", action: "change->grader-config#toggleConfig" } } %>
+            { class: "form__input", 
+              data: { "config-toggler-target": "selector", action: "change->config-toggler#toggle" } } %>
         <p class="form__help">Select how the expected output should be compared to the actual output</p>
       </div>
 
-      <div id="grader-config-fields" class="form__group" style="display: none;">
+      <div id="grader-config-fields" class="form__group" style="display: none;" data-config-toggler-target="configSection">
         <label class="form__label">Grader Configuration</label>
 
-        <div id="regex-config" class="grader-config-section" style="display: none;">
+        <div id="regex-config" class="grader-config-section" style="display: none;" data-config-toggler-target="configSection">
           <%= form.label :grader_config_pattern, "Regular Expression Pattern", class: "form__label" %>
           <span class="form__required">*</span>
           <%= text_field_tag "eval_set[grader_config][pattern]",
@@ -56,7 +58,7 @@
           <p class="form__help">Enter a valid regular expression pattern to match against the output</p>
         </div>
 
-        <div id="json-schema-config" class="grader-config-section" style="display: none;">
+        <div id="json-schema-config" class="grader-config-section" style="display: none;" data-config-toggler-target="configSection">
           <%= form.label :grader_config_schema, "JSON Schema", class: "form__label" %>
           <span class="form__required">*</span>
           <%= text_area_tag "eval_set[grader_config][schema]",
@@ -74,40 +76,7 @@
             data: { disable_with: "Creating..." } %>
         <%= link_to "Cancel", prompt_eval_sets_path(@prompt), class: "btn btn--secondary btn--medium" %>
       </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const graderTypeSelect = document.getElementById('grader-type-select');
-    const graderConfigFields = document.getElementById('grader-config-fields');
-    const regexConfig = document.getElementById('regex-config');
-    const jsonSchemaConfig = document.getElementById('json-schema-config');
-
-    function toggleGraderConfig() {
-      const selectedGrader = graderTypeSelect.value;
-
-      // Hide all config sections first
-      regexConfig.style.display = 'none';
-      jsonSchemaConfig.style.display = 'none';
-
-      // Show appropriate config section based on grader type
-      if (selectedGrader === 'regex') {
-        graderConfigFields.style.display = 'block';
-        regexConfig.style.display = 'block';
-      } else if (selectedGrader === 'json_schema') {
-        graderConfigFields.style.display = 'block';
-        jsonSchemaConfig.style.display = 'block';
-      } else {
-        graderConfigFields.style.display = 'none';
-      }
-    }
-
-    // Add event listener
-    graderTypeSelect.addEventListener('change', toggleGraderConfig);
-
-    // Initialize on page load
-    toggleGraderConfig();
-  });
-</script>

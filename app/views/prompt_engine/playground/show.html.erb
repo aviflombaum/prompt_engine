@@ -10,7 +10,11 @@
     <h3 class="card__title">Playground Settings</h3>
   </div>
   <div class="card__body">
-    <%= form_with url: playground_prompt_path(@prompt), method: :post, local: true, html: { class: "form" } do |form| %>
+    <div data-controller="api-key-switcher"
+         data-api-key-switcher-anthropic-key-value="<%= @settings.anthropic_api_key %>"
+         data-api-key-switcher-openai-key-value="<%= @settings.openai_api_key %>"
+         data-api-key-switcher-edit-settings-path-value="<%= edit_settings_path %>">
+      <%= form_with url: playground_prompt_path(@prompt), method: :post, local: true, html: { class: "form" } do |form| %>
       <div class="form__group">
         <%= form.label :provider, "AI Provider", class: "form__label form__label--required" %>
         <% 
@@ -30,7 +34,9 @@
               ["OpenAI (gpt-4o)", "openai"]
             ], default_provider),
             { prompt: "Select a provider" },
-            class: "form__select", required: true %>
+            class: "form__select", 
+            required: true,
+            data: { action: "change->api-key-switcher#updateApiKey" } %>
         <div class="form__help">
           <% if @prompt.model.present? %>
             Prompt is configured for <%= @prompt.model %>
@@ -60,11 +66,8 @@
             required: true,
             value: default_api_key,
             placeholder: api_key_configured ? "Using saved API key" : "Enter your API key",
-            data: { 
-              anthropic_key: @settings.anthropic_api_key,
-              openai_key: @settings.openai_api_key
-            } %>
-        <div class="form__help">
+            data: { "api-key-switcher-target": "apiKeyField" } %>
+        <div class="form__help" data-api-key-switcher-target="helpText">
           <% if api_key_configured %>
             Using saved API key from settings. <%= link_to "Change in settings", edit_settings_path, class: "link" %>
           <% else %>
@@ -92,38 +95,7 @@
         <%= link_to "Cancel", prompt_path(@prompt), class: "btn btn--secondary btn--medium" %>
         <%= form.submit "Test Prompt", class: "btn btn--primary btn--medium" %>
       </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 </div>
-
-<script>
-  // Update API key when provider changes
-  document.addEventListener('DOMContentLoaded', function() {
-    const providerSelect = document.getElementById('provider');
-    const apiKeyField = document.getElementById('api_key');
-    const helpText = apiKeyField.parentElement.querySelector('.form__help');
-    
-    if (providerSelect && apiKeyField) {
-      const anthropicKey = apiKeyField.dataset.anthropicKey;
-      const openaiKey = apiKeyField.dataset.openaiKey;
-      
-      providerSelect.addEventListener('change', function() {
-        const selectedProvider = this.value;
-        
-        if (selectedProvider === 'anthropic' && anthropicKey) {
-          apiKeyField.value = anthropicKey;
-          apiKeyField.placeholder = 'Using saved API key';
-          helpText.innerHTML = 'Using saved API key from settings. <a href="<%= edit_settings_path %>" class="link">Change in settings</a>';
-        } else if (selectedProvider === 'openai' && openaiKey) {
-          apiKeyField.value = openaiKey;
-          apiKeyField.placeholder = 'Using saved API key';
-          helpText.innerHTML = 'Using saved API key from settings. <a href="<%= edit_settings_path %>" class="link">Change in settings</a>';
-        } else {
-          apiKeyField.value = '';
-          apiKeyField.placeholder = 'Enter your API key';
-          helpText.innerHTML = 'Your API key will not be stored. <a href="<%= edit_settings_path %>" class="link">Save in settings</a>';
-        }
-      });
-    }
-  });
-</script>

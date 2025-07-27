@@ -102,13 +102,15 @@
   </div>
 </div>
 
-<div class="card">
+<div class="card" data-controller="checkbox-limiter" 
+     data-checkbox-limiter-max-value="2"
+     data-checkbox-limiter-button-text-value="Compare Selected">
   <div class="card__header">
     <h3 class="card__title">Recent Evaluation Runs</h3>
     <% if @recent_runs.select { |r| r.status == 'completed' }.count >= 2 %>
       <div class="card__actions">
         <button type="submit" form="compare-runs-form" class="btn btn--secondary btn--small" 
-                id="compare-runs-btn" disabled>
+                data-checkbox-limiter-target="submitButton" disabled>
           Compare Selected (0/2)
         </button>
       </div>
@@ -143,7 +145,9 @@
                           data: { 
                             run_id: run.id,
                             version: "v#{run.prompt_version.version_number}",
-                            date: run.created_at.strftime("%b %d, %Y %I:%M %p")
+                            date: run.created_at.strftime("%b %d, %Y %I:%M %p"),
+                            "checkbox-limiter-target": "checkbox",
+                            action: "change->checkbox-limiter#toggle"
                           } %>
                     <% else %>
                       <span class="text-muted" title="Only completed runs can be compared">—</span>
@@ -200,36 +204,3 @@
     <% end %>
   </div>
 </div>
-
-<% if @recent_runs.select { |r| r.status == 'completed' }.count >= 2 %>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const checkboxes = document.querySelectorAll('.compare-checkbox');
-  const compareBtn = document.getElementById('compare-runs-btn');
-  
-  function updateCompareButton() {
-    const checkedBoxes = document.querySelectorAll('.compare-checkbox:checked');
-    const count = checkedBoxes.length;
-    
-    compareBtn.disabled = count !== 2;
-    compareBtn.textContent = `Compare Selected (${count}/2)`;
-    
-    // Disable unchecked checkboxes if 2 are already selected
-    checkboxes.forEach(checkbox => {
-      if (!checkbox.checked && count === 2) {
-        checkbox.disabled = true;
-      } else {
-        checkbox.disabled = false;
-      }
-    });
-  }
-  
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', updateCompareButton);
-  });
-  
-  // Initialize button state
-  updateCompareButton();
-});
-</script>
-<% end %>

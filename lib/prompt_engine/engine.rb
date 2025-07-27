@@ -12,6 +12,9 @@ module PromptEngine
     config.autoload_paths += %W[#{config.root}/app/services]
     config.autoload_paths += %W[#{config.root}/app/clients]
 
+    # Precompile engine assets
+    config.assets.precompile += %w[prompt_engine/application.js prompt_engine/application.css]
+
     # Ensure engine's migrations are available to the host app
     # This is the standard Rails engine pattern
     initializer :append_migrations do |app|

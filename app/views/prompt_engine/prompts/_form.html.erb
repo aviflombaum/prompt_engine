@@ -1,4 +1,5 @@
-<%= form_with(model: prompt, local: true, html: { class: "form" }) do |form| %>
+<div data-controller="slug-generator" data-slug-generator-auto-generate-value="<%= prompt.new_record? %>">
+  <%= form_with(model: prompt, local: true, html: { class: "form" }) do |form| %>
   <% if prompt.errors.any? %>
     <div class="form__errors">
       <h3 class="text-danger">Please fix the following errors:</h3>
@@ -14,7 +15,7 @@
     <%= form.label :name, class: "form__label form__label--required" %>
     <%= form.text_field :name, class: "form__input", required: true, 
         placeholder: "e.g., Customer Support Response",
-        data: { action: "input->slug-generator#generateSlug" } %>
+        data: { "slug-generator-target": "sourceField", action: "input->slug-generator#generateSlug" } %>
     <div class="form__help">A descriptive name for this prompt</div>
   </div>
 
@@ -111,7 +112,8 @@
     <%= form.submit prompt.new_record? ? "Create Prompt" : "Update Prompt", 
         class: "btn btn--primary btn--medium" %>
   </div>
-<% end %>
+  <% end %>
+</div>
 
 
 <script>
@@ -119,27 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const contentField = document.querySelector('[data-action="input->variable-detector#detectVariables"]');
   const parametersSection = document.getElementById('parameters-section');
   const parametersList = document.getElementById('parameters-list');
-  
-  // Slug generation
-  const nameField = document.querySelector('[data-action="input->slug-generator#generateSlug"]');
-  const slugField = document.querySelector('[data-slug-generator-target="slugField"]');
-  
-  if (nameField && slugField) {
-    function generateSlug() {
-      // Only auto-generate if slug is empty or if it's a new record
-      if (!slugField.value || <%= prompt.new_record? %>) {
-        const slug = nameField.value
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-          .replace(/\s+/g, '-') // Replace spaces with hyphens
-          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-        slugField.value = slug;
-      }
-    }
-    
-    nameField.addEventListener('input', generateSlug);
-  }
   
   // Store existing parameters data (for edit form)
   const existingParameters = <%= raw((prompt.persisted? ? prompt.parameters : []).map { |p| {
