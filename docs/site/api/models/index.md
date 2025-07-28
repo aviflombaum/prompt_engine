@@ -10,6 +10,14 @@ has_children: true
 
 PromptEngine includes the following models:
 
+- [ApplicationRecord](application-record.md) - ApplicationRecord model
+- [EvalResult](eval-result.md) - EvalResult model
+- [EvalRun](eval-run.md) - EvalRun model
+- [EvalSet](eval-set.md) - EvalSet model
+- [Parameter](parameter.md) - Variable definitions and validation
+- [ParameterParser](parameter-parser.md) - ParameterParser model
+- [PlaygroundRunResult](playground-run-result.md) - PlaygroundRunResult model
 - [Prompt](prompt.md) - Core prompt model with version control
 - [PromptVersion](prompt-version.md) - Immutable prompt snapshots
-- [Parameter](parameter.md) - Variable definitions and validation
+- [Setting](setting.md) - Setting model
+- [TestCase](test-case.md) - TestCase model
