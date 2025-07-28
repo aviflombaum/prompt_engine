@@ -1,16 +1,20 @@
 require "rails_helper"
+require "ostruct"
 
 RSpec.describe PromptEngine::Documentation::Generator do
   let(:output_dir) { Rails.root.join("tmp/test_docs") }
   let(:generator) { described_class.new(output_dir: output_dir) }
-  let(:mock_llm_client) { instance_double(RubyLLM::Anthropic) }
+  let(:mock_chat) { instance_double(RubyLLM::Chat) }
+  let(:mock_response) { OpenStruct.new(content: "# TestModel\n\nThis is the documentation for TestModel.") }
 
   before do
     FileUtils.rm_rf(output_dir) if Dir.exist?(output_dir)
     FileUtils.mkdir_p(output_dir)
     
-    # Mock LLM client
-    allow(generator).to receive(:llm_client).and_return(mock_llm_client)
+    # Mock RubyLLM.chat
+    allow(RubyLLM).to receive(:chat).and_return(mock_chat)
+    allow(mock_chat).to receive(:with_instructions).and_return(mock_chat)
+    allow(mock_chat).to receive(:ask).and_return(mock_response)
     
     # Mock credentials
     allow(Rails.application.credentials).to receive(:anthropic).and_return(
@@ -31,12 +35,22 @@ RSpec.describe PromptEngine::Documentation::Generator do
       before do
         allow(Rails.application.credentials).to receive(:anthropic).and_return(nil)
         allow(Rails.application.credentials).to receive(:openai).and_return(nil)
+        # Temporarily clear environment variables
+        @original_openai_key = ENV["OPENAI_API_KEY"]
+        @original_anthropic_key = ENV["ANTHROPIC_API_KEY"]
+        ENV["OPENAI_API_KEY"] = nil
+        ENV["ANTHROPIC_API_KEY"] = nil
       end
 
-      it "raises an error" do
-        expect { described_class.new }.to raise_error(
-          /No LLM API key configured/
-        )
+      after do
+        # Restore environment variables
+        ENV["OPENAI_API_KEY"] = @original_openai_key
+        ENV["ANTHROPIC_API_KEY"] = @original_anthropic_key
+      end
+
+      it "initializes without API configuration" do
+        generator = described_class.new
+        expect(generator.llm_client).to be_falsey
       end
     end
   end
@@ -77,11 +91,6 @@ RSpec.describe PromptEngine::Documentation::Generator do
 
   describe "#generate_model_docs" do
     let(:test_model_file) { Rails.root.join("app/models/prompt_engine/test_model.rb") }
-    let(:mock_response) do
-      OpenStruct.new(
-        completion: "# TestModel\n\nThis is the documentation for TestModel."
-      )
-    end
 
     before do
       FileUtils.mkdir_p(File.dirname(test_model_file))
@@ -93,7 +102,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
         end
       RUBY
 
-      allow(mock_llm_client).to receive(:complete).and_return(mock_response)
+      # Mocking is already set up in the before block
     end
 
     after do
@@ -130,11 +139,6 @@ RSpec.describe PromptEngine::Documentation::Generator do
 
   describe "#generate_controller_docs" do
     let(:test_controller_file) { Rails.root.join("app/controllers/prompt_engine/test_controller.rb") }
-    let(:mock_response) do
-      OpenStruct.new(
-        completion: "# Test API\n\nAPI documentation for TestController."
-      )
-    end
 
     before do
       FileUtils.mkdir_p(File.dirname(test_controller_file))
@@ -148,7 +152,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
         end
       RUBY
 
-      allow(mock_llm_client).to receive(:complete).and_return(mock_response)
+      # Mocking is already set up in the before block
     end
 
     after do
@@ -174,11 +178,6 @@ RSpec.describe PromptEngine::Documentation::Generator do
 
   describe "#generate_service_docs" do
     let(:test_service_file) { Rails.root.join("app/services/prompt_engine/test_service.rb") }
-    let(:mock_response) do
-      OpenStruct.new(
-        completion: "# TestService\n\nService documentation."
-      )
-    end
 
     before do
       FileUtils.mkdir_p(File.dirname(test_service_file))
@@ -192,7 +191,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
         end
       RUBY
 
-      allow(mock_llm_client).to receive(:complete).and_return(mock_response)
+      # Mocking is already set up in the before block
     end
 
     after do
@@ -285,14 +284,9 @@ RSpec.describe PromptEngine::Documentation::Generator do
   end
 
   describe "#generate_installation" do
-    let(:mock_response) do
-      OpenStruct.new(
-        completion: "# Detailed Installation Guide\n\nStep by step installation..."
-      )
-    end
 
     before do
-      allow(mock_llm_client).to receive(:complete).and_return(mock_response)
+      # Mocking is already set up in the before block
     end
 
     it "creates an installation page using LLM" do
@@ -339,7 +333,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
       it "builds a comprehensive model prompt" do
         prompt = generator.send(:build_model_prompt, analysis)
         
-        expect(prompt).to include("technical writer creating documentation")
+        expect(prompt).to include("Given this Ruby model code:")
         expect(prompt).to include("class TestModel; end")
         expect(prompt).to include("Class: TestModel")
         expect(prompt).to include("Module: PromptEngine")
@@ -352,7 +346,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
       it "builds a comprehensive controller prompt" do
         prompt = generator.send(:build_controller_prompt, analysis)
         
-        expect(prompt).to include("technical writer creating API documentation")
+        expect(prompt).to include("Given this Rails controller code:")
         expect(prompt).to include("class TestModel; end")
         expect(prompt).to include("Class: TestModel")
         expect(prompt).to include("test_method")
@@ -363,7 +357,7 @@ RSpec.describe PromptEngine::Documentation::Generator do
       it "builds a comprehensive service prompt" do
         prompt = generator.send(:build_service_prompt, analysis)
         
-        expect(prompt).to include("technical writer documenting a service object")
+        expect(prompt).to include("Given this service class:")
         expect(prompt).to include("class TestModel; end")
         expect(prompt).to include("Class: TestModel")
         expect(prompt).to include("test_method")

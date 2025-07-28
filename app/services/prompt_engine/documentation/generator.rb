@@ -1,4 +1,8 @@
 require "ruby_llm"
+require "dotenv"
+
+# Load environment variables from .env file in development
+Dotenv.load if defined?(Rails) && Rails.env.development?
 
 module PromptEngine
   module Documentation
@@ -86,34 +90,32 @@ module PromptEngine
       private
 
       def initialize_llm_client
-        # Try Anthropic first, fall back to OpenAI
+        # Configure RubyLLM with API keys
         # In a Rails engine context, we need to check if we're in dummy app or host app
         app = defined?(Rails.application) ? Rails.application : nil
         
+        # Set API key in environment or configuration
         if app && app.credentials.dig(:anthropic, :api_key)
-          RubyLLM::Anthropic.new(
-            api_key: app.credentials.anthropic[:api_key],
-            model: "claude-3-5-sonnet-20241022"
-          )
+          ENV["ANTHROPIC_API_KEY"] ||= app.credentials.anthropic[:api_key]
         elsif app && app.credentials.dig(:openai, :api_key)
-          RubyLLM::OpenAI.new(
-            api_key: app.credentials.openai[:api_key],
-            model: "gpt-4-turbo"
-          )
-        elsif ENV["ANTHROPIC_API_KEY"]
-          RubyLLM::Anthropic.new(
-            api_key: ENV["ANTHROPIC_API_KEY"],
-            model: "claude-3-5-sonnet-20241022"
-          )
-        elsif ENV["OPENAI_API_KEY"]
-          RubyLLM::OpenAI.new(
-            api_key: ENV["OPENAI_API_KEY"],
-            model: "gpt-4-turbo"
-          )
-        else
-          # Return nil to allow mock mode
-          nil
+          ENV["OPENAI_API_KEY"] ||= app.credentials.openai[:api_key]
         end
+        
+        # Configure RubyLLM
+        RubyLLM.configure do |config|
+          config.openai_api_key = ENV["OPENAI_API_KEY"] if ENV["OPENAI_API_KEY"]
+          config.anthropic_api_key = ENV["ANTHROPIC_API_KEY"] if ENV["ANTHROPIC_API_KEY"]
+          config.default_model = if ENV["ANTHROPIC_API_KEY"]
+            "claude-3-5-sonnet-20241022"
+          elsif ENV["OPENAI_API_KEY"]
+            "gpt-4-turbo"
+          else
+            nil
+          end
+        end
+        
+        # Return true if we have API keys configured
+        ENV["ANTHROPIC_API_KEY"] || ENV["OPENAI_API_KEY"] ? true : nil
       end
 
       def ensure_output_directory
@@ -127,8 +129,11 @@ module PromptEngine
       def generate_model_documentation(analysis)
         prompt = build_model_prompt(analysis)
         
-        response = llm_client.complete(prompt)
-        content = response.completion
+        chat = RubyLLM.chat
+          .with_instructions("You are a technical writer creating documentation for a Rails model.")
+        
+        response = chat.ask(prompt)
+        content = response.content
         
         # Add frontmatter
         frontmatter = {
@@ -144,8 +149,11 @@ module PromptEngine
       def generate_controller_documentation(analysis)
         prompt = build_controller_prompt(analysis)
         
-        response = llm_client.complete(prompt)
-        content = response.completion
+        chat = RubyLLM.chat
+          .with_instructions("You are a technical writer creating API documentation.")
+        
+        response = chat.ask(prompt)
+        content = response.content
         
         # Add frontmatter
         controller_name = analysis[:class_name].gsub("Controller", "")
@@ -162,8 +170,11 @@ module PromptEngine
       def generate_service_documentation(analysis)
         prompt = build_service_prompt(analysis)
         
-        response = llm_client.complete(prompt)
-        content = response.completion
+        chat = RubyLLM.chat
+          .with_instructions("You are a technical writer documenting a service object.")
+        
+        response = chat.ask(prompt)
+        content = response.content
         
         # Add frontmatter
         frontmatter = {
@@ -178,8 +189,6 @@ module PromptEngine
 
       def build_model_prompt(analysis)
         <<~PROMPT
-          You are a technical writer creating documentation for a Rails model.
-
           Given this Ruby model code:
           #{analysis[:raw_content]}
 
@@ -206,8 +215,6 @@ module PromptEngine
 
       def build_controller_prompt(analysis)
         <<~PROMPT
-          You are a technical writer creating API documentation.
-
           Given this Rails controller code:
           #{analysis[:raw_content]}
 
@@ -234,8 +241,6 @@ module PromptEngine
 
       def build_service_prompt(analysis)
         <<~PROMPT
-          You are a technical writer documenting a service object.
-
           Given this service class:
           #{analysis[:raw_content]}
 
@@ -405,8 +410,11 @@ module PromptEngine
           Format as clean markdown. Do not include frontmatter.
         PROMPT
 
-        response = llm_client.complete(prompt)
-        content = response.completion
+        chat = RubyLLM.chat
+          .with_instructions("You are a technical writer creating installation documentation.")
+        
+        response = chat.ask(prompt)
+        content = response.content
 
         frontmatter = {
           title: "Installation",

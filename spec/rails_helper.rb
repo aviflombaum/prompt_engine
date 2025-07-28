@@ -36,6 +36,10 @@ require "factory_bot_rails"
 require "capybara/rails"
 require "capybara/rspec"
 require "selenium-webdriver"
+require "dotenv"
+
+# Load .env file for test environment
+Dotenv.load
 
 # Load support files
 ENGINE_ROOT = File.join(File.dirname(__FILE__), "../")

@@ -13,3 +13,5 @@
 coverage
 /spec/dummy/log/*
 rspec_output.txt
+.env
+.env.local

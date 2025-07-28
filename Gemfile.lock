@@ -109,6 +109,7 @@ GEM
     date (3.4.1)
     diff-lcs (1.6.2)
     docile (1.4.1)
+    dotenv (3.1.8)
     drb (2.2.3)
     erb (5.0.2)
     erubi (1.13.1)
@@ -340,6 +341,7 @@ PLATFORMS
 
 DEPENDENCIES
   capybara (~> 3.40)
+  dotenv (~> 3.1)
   factory_bot_rails (~> 6.4)
   prompt_engine!
   propshaft
