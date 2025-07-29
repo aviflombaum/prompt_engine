@@ -22,8 +22,9 @@ module PromptEngine
 
     # Ensure engine's migrations are available to the host app
     # This is the standard Rails engine pattern
+    # Skip this for the dummy app to avoid duplicate migrations
     initializer :append_migrations do |app|
-      unless app.root.to_s.match?(root.to_s)
+      unless app.root.to_s.match?(root.to_s) || app.root.to_s.include?('spec/dummy')
         config.paths["db/migrate"].expanded.each do |expanded_path|
           app.config.paths["db/migrate"] << expanded_path
         end

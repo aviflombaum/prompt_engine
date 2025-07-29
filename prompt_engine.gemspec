@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "vcr", "~> 6.3"
   spec.add_development_dependency "webmock", "~> 3.23"
   spec.add_development_dependency "capybara", "~> 3.40"
-  spec.add_development_dependency "selenium-webdriver", "~> 4.20"
+  spec.add_development_dependency "cuprite", "~> 0.15"
+  spec.add_development_dependency "selenium-webdriver", "~> 4.27"
   spec.add_development_dependency "simplecov"
 end

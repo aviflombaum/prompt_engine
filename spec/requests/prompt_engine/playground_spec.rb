@@ -1,5 +1,4 @@
 require "rails_helper"
-require "webmock/rspec"
 
 module PromptEngine
   RSpec.describe "Playground", type: :request do

@@ -10,7 +10,7 @@ RSpec.describe "Test Case Import", type: :system do
     # Ensure parameters are synced
     prompt.sync_parameters!
 
-    driven_by(:selenium_chrome_headless)
+    driven_by(:cuprite)
   end
 
   scenario "User imports test cases from CSV file" do

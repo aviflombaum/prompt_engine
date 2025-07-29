@@ -114,12 +114,21 @@ RSpec.describe "Evaluation Edge Cases", type: :integration do
       mock_client = instance_double(PromptEngine::OpenAiEvalsClient)
       allow(PromptEngine::OpenAiEvalsClient).to receive(:new).and_return(mock_client)
 
-      # Should fail when trying to upload empty test data
-      expect { runner.execute }.to raise_error(WebMock::NetConnectNotAllowedError)
+      # Mock create_eval to succeed (since it's called first)
+      allow(mock_client).to receive(:create_eval).and_return({ 'id' => 'test-eval-123' })
+      
+      # Mock upload_file to simulate uploading empty file - this should fail or return an error
+      allow(mock_client).to receive(:upload_file).and_raise(
+        PromptEngine::OpenAiEvalsClient::APIError, "File contains no data"
+      )
 
-      # The status remains "running" because the error happens before status update
+      # Should fail when trying to upload empty test data
+      expect { runner.execute }.to raise_error(PromptEngine::OpenAiEvalsClient::APIError, "File contains no data")
+
+      # The status should be failed with the error message
       eval_run.reload
-      expect(eval_run.status).to eq("running")
+      expect(eval_run.status).to eq("failed")
+      expect(eval_run.error_message).to eq("File contains no data")
     end
 
     it "allows adding test cases after creation" do

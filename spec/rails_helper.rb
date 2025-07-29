@@ -35,7 +35,7 @@ require "rspec/rails"
 require "factory_bot_rails"
 require "capybara/rails"
 require "capybara/rspec"
-require "selenium-webdriver"
+require "capybara/cuprite"
 
 # Load support files
 ENGINE_ROOT = File.join(File.dirname(__FILE__), "../")
@@ -105,20 +105,4 @@ RSpec.configure do |config|
   end
 end
 
-# Configure Capybara for system tests
-Capybara.configure do |config|
-  config.default_driver = :rack_test
-  config.server = :puma, { Silent: true }
-  config.app_host = "http://localhost:3000"
-end
-
-# Optional: Configure Selenium for Chrome (when ChromeDriver is updated)
-Capybara.register_driver :selenium_chrome_headless do |app|
-  options = Selenium::WebDriver::Chrome::Options.new
-  options.add_argument("--headless=new")
-  options.add_argument("--disable-gpu")
-  options.add_argument("--no-sandbox")
-  options.add_argument("--disable-dev-shm-usage")
-
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
-end
+# Capybara configuration is now in spec/support/capybara.rb
