@@ -9,6 +9,11 @@ gem "sqlite3"
 
 gem "propshaft"
 
+# Hotwire for modern Rails frontend
+gem "stimulus-rails"
+gem "turbo-rails"
+gem "importmap-rails"
+
 # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
 gem "rubocop-rails-omakase", require: false
 

@@ -12,8 +12,13 @@ module PromptEngine
     config.autoload_paths += %W[#{config.root}/app/services]
     config.autoload_paths += %W[#{config.root}/app/clients]
 
-    # Precompile engine assets
-    config.assets.precompile += %w[prompt_engine/application.js prompt_engine/application.css]
+    # Configure importmap for the engine
+    initializer "prompt_engine.importmap", before: "importmap" do |app|
+      # Only configure if the app uses importmap
+      if app.config.respond_to?(:importmap)
+        app.config.importmap.paths << root.join("config/importmap.rb")
+      end
+    end
 
     # Ensure engine's migrations are available to the host app
     # This is the standard Rails engine pattern

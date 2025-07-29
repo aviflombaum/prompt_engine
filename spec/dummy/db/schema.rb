@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_29_220448) do
   create_table "prompt_engine_eval_results", force: :cascade do |t|
     t.integer "eval_run_id", null: false
     t.integer "test_case_id", null: false
@@ -20,8 +20,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.text "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "eval_run_id" ], name: "index_prompt_engine_eval_results_on_eval_run_id"
-    t.index [ "test_case_id" ], name: "index_prompt_engine_eval_results_on_test_case_id"
+    t.index ["eval_run_id"], name: "index_prompt_engine_eval_results_on_eval_run_id"
+    t.index ["test_case_id"], name: "index_prompt_engine_eval_results_on_test_case_id"
   end
 
   create_table "prompt_engine_eval_runs", force: :cascade do |t|
@@ -39,9 +39,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.string "openai_run_id"
     t.string "openai_file_id"
     t.string "report_url"
-    t.index [ "eval_set_id" ], name: "index_prompt_engine_eval_runs_on_eval_set_id"
-    t.index [ "openai_run_id" ], name: "index_prompt_engine_eval_runs_on_openai_run_id"
-    t.index [ "prompt_version_id" ], name: "index_prompt_engine_eval_runs_on_prompt_version_id"
+    t.index ["eval_set_id"], name: "index_prompt_engine_eval_runs_on_eval_set_id"
+    t.index ["openai_run_id"], name: "index_prompt_engine_eval_runs_on_openai_run_id"
+    t.index ["prompt_version_id"], name: "index_prompt_engine_eval_runs_on_prompt_version_id"
   end
 
   create_table "prompt_engine_eval_sets", force: :cascade do |t|
@@ -53,10 +53,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.string "openai_eval_id"
     t.string "grader_type", default: "exact_match", null: false
     t.json "grader_config", default: {}
-    t.index [ "grader_type" ], name: "index_prompt_engine_eval_sets_on_grader_type"
-    t.index [ "openai_eval_id" ], name: "index_prompt_engine_eval_sets_on_openai_eval_id"
-    t.index [ "prompt_id", "name" ], name: "index_prompt_engine_eval_sets_on_prompt_id_and_name", unique: true
-    t.index [ "prompt_id" ], name: "index_prompt_engine_eval_sets_on_prompt_id"
+    t.index ["grader_type"], name: "index_prompt_engine_eval_sets_on_grader_type"
+    t.index ["openai_eval_id"], name: "index_prompt_engine_eval_sets_on_openai_eval_id"
+    t.index ["prompt_id", "name"], name: "index_prompt_engine_eval_sets_on_prompt_id_and_name", unique: true
+    t.index ["prompt_id"], name: "index_prompt_engine_eval_sets_on_prompt_id"
   end
 
   create_table "prompt_engine_parameters", force: :cascade do |t|
@@ -71,9 +71,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "position" ], name: "index_prompt_engine_parameters_on_position"
-    t.index [ "prompt_id", "name" ], name: "index_prompt_engine_parameters_on_prompt_id_and_name", unique: true
-    t.index [ "prompt_id" ], name: "index_prompt_engine_parameters_on_prompt_id"
+    t.index ["position"], name: "index_prompt_engine_parameters_on_position"
+    t.index ["prompt_id", "name"], name: "index_prompt_engine_parameters_on_prompt_id_and_name", unique: true
+    t.index ["prompt_id"], name: "index_prompt_engine_parameters_on_prompt_id"
   end
 
   create_table "prompt_engine_playground_run_results", force: :cascade do |t|
@@ -90,9 +90,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.integer "max_tokens"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "created_at" ], name: "index_prompt_engine_playground_run_results_on_created_at"
-    t.index [ "prompt_version_id" ], name: "index_prompt_engine_playground_run_results_on_prompt_version_id"
-    t.index [ "provider" ], name: "index_prompt_engine_playground_run_results_on_provider"
+    t.index ["created_at"], name: "index_prompt_engine_playground_run_results_on_created_at"
+    t.index ["prompt_version_id"], name: "index_prompt_engine_playground_run_results_on_prompt_version_id"
+    t.index ["provider"], name: "index_prompt_engine_playground_run_results_on_provider"
   end
 
   create_table "prompt_engine_prompt_versions", force: :cascade do |t|
@@ -108,9 +108,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.text "change_description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "prompt_id", "version_number" ], name: "index_prompt_versions_on_prompt_and_version", unique: true
-    t.index [ "prompt_id" ], name: "index_prompt_engine_prompt_versions_on_prompt_id"
-    t.index [ "version_number" ], name: "index_prompt_engine_prompt_versions_on_version_number"
+    t.index ["prompt_id", "version_number"], name: "index_prompt_versions_on_prompt_and_version", unique: true
+    t.index ["prompt_id"], name: "index_prompt_engine_prompt_versions_on_prompt_id"
+    t.index ["version_number"], name: "index_prompt_engine_prompt_versions_on_version_number"
   end
 
   create_table "prompt_engine_prompts", force: :cascade do |t|
@@ -127,7 +127,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.datetime "updated_at", null: false
     t.integer "versions_count", default: 0, null: false
     t.string "slug"
-    t.index [ "slug" ], name: "index_prompt_engine_prompts_on_slug", unique: true
+    t.index ["slug"], name: "index_prompt_engine_prompts_on_slug", unique: true
   end
 
   create_table "prompt_engine_settings", force: :cascade do |t|
@@ -145,7 +145,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_201639) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "eval_set_id" ], name: "index_prompt_engine_test_cases_on_eval_set_id"
+    t.index ["eval_set_id"], name: "index_prompt_engine_test_cases_on_eval_set_id"
   end
 
   add_foreign_key "prompt_engine_eval_results", "prompt_engine_eval_runs", column: "eval_run_id"
