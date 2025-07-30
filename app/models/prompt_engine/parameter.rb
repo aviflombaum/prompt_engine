@@ -3,7 +3,7 @@ module PromptEngine
     self.table_name = "prompt_engine_parameters"
 
     # Parameter types that can be used
-    TYPES = %w[string integer decimal boolean datetime date array json].freeze
+    TYPES = %w[string integer decimal boolean datetime date array json file].freeze
 
     belongs_to :prompt, class_name: "PromptEngine::Prompt"
 

@@ -10,7 +10,7 @@
     <h3 class="card__title">Playground Settings</h3>
   </div>
   <div class="card__body">
-    <%= form_with url: playground_prompt_path(@prompt), method: :post, local: true, html: { class: "form" } do |form| %>
+    <%= form_with url: playground_prompt_path(@prompt), method: :post, local: true, html: { class: "form", multipart: true } do |form| %>
       <div class="form__group">
         <%= form.label :provider, "AI Provider", class: "form__label form__label--required" %>
         <% 
@@ -78,12 +78,21 @@
         <div class="form__help mb-md">Fill in the values for each parameter:</div>
         
         <% @parameters.each do |parameter_name| %>
+          <% parameter = @prompt.parameters.find_by(name: parameter_name) %>
           <div class="form__group">
             <%= form.label "parameters[#{parameter_name}]", parameter_name.humanize.titleize, class: "form__label" %>
-            <%= form.text_area "parameters[#{parameter_name}]", 
-                class: "form__textarea",
-                rows: 3,
-                placeholder: "Enter value for #{parameter_name}" %>
+            <% if parameter&.parameter_type == 'file' %>
+              <%= form.file_field "files[]", 
+                  class: "form__input",
+                  accept: ".pdf,.jpg,.jpeg,.png,.gif,.webp",
+                  multiple: false %>
+              <div class="form__help">Upload a file (PDF, JPG, PNG, GIF, WebP)</div>
+            <% else %>
+              <%= form.text_area "parameters[#{parameter_name}]", 
+                  class: "form__textarea",
+                  rows: 3,
+                  placeholder: "Enter value for #{parameter_name}" %>
+            <% end %>
           </div>
         <% end %>
       <% end %>

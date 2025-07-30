@@ -111,6 +111,7 @@ bin/rails prompt_engine:install:migrations  # Install engine migrations in host 
 - Handles AI provider communication (Anthropic, OpenAI)
 - Manages API keys from Rails credentials
 - Formats requests and parses responses
+- Supports PDF file attachments for document-based prompts
 
 ### Testing Philosophy
 
@@ -172,6 +173,7 @@ Read `.ai/RSPEC-TESTS.md` before writing tests. Key principles:
 - Supports multiple models (GPT-4, Claude, etc.)
 - Real-time execution with streaming responses
 - Token counting and cost estimation
+- PDF file support for document analysis and processing
 
 ### Engine Integration
 

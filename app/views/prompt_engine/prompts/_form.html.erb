@@ -1,4 +1,4 @@
-<%= form_with(model: prompt, local: true, html: { class: "form" }) do |form| %>
+<%= form_with(model: prompt, local: true, html: { class: "form", multipart: true }) do |form| %>
   <% if prompt.errors.any? %>
     <div class="form__errors">
       <h3 class="text-danger">Please fix the following errors:</h3>
@@ -210,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value="boolean" ${existingData?.parameter_type === 'boolean' ? 'selected' : ''}>Boolean</option>
           <option value="array" ${existingData?.parameter_type === 'array' ? 'selected' : ''}>Array</option>
           <option value="object" ${existingData?.parameter_type === 'object' ? 'selected' : ''}>Object</option>
+          <option value="file" ${existingData?.parameter_type === 'file' ? 'selected' : ''}>File</option>
         </select>
       </div>
       

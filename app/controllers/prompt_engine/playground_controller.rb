@@ -9,11 +9,20 @@ module PromptEngine
     end
 
     def execute
+      # Process uploaded files and add them to parameters
+      processed_parameters = process_parameters_with_files
+
+      # Validate API key is present and not empty
+      if params[:api_key].blank?
+        @error = "API key is required"
+        render :result and return
+      end
+
       executor = PlaygroundExecutor.new(
         prompt: @prompt,
         provider: params[:provider],
-        api_key: params[:api_key],
-        parameters: params[:parameters]
+        api_key: params[:api_key].strip,
+        parameters: processed_parameters
       )
 
       begin
@@ -52,6 +61,26 @@ module PromptEngine
 
     def set_prompt
       @prompt = Prompt.find(params[:id])
+    end
+
+    def process_parameters_with_files
+      processed_params = params[:parameters]&.to_unsafe_h || {}
+
+      # Collect all uploaded files, filtering out empty ones
+      uploaded_files = []
+
+      # Add files from the general file upload field
+      if params[:files].present?
+        general_files = params[:files].is_a?(Array) ? params[:files] : [ params[:files] ]
+        uploaded_files.concat(general_files.compact.reject { |f| f.blank? || (f.respond_to?(:original_filename) && f.original_filename.blank?) })
+      end
+
+      # Add files to parameters if any were uploaded
+      if uploaded_files.any?
+        processed_params[:files] = uploaded_files
+      end
+
+      processed_params
     end
   end
 end

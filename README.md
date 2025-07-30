@@ -13,6 +13,7 @@ test, and optimize their AI prompts without deploying code changes.
 - **A/B Testing**: Test different prompt variations with built-in evaluation tools
 - **No Deploy Required**: Update prompts through the admin UI without code changes
 - **LLM Agnostic**: Works with OpenAI, Anthropic, and other providers
+- **Multi-Modal Support**: Upload and process PDF documents and images in prompts
 - **Type Safety**: Automatic parameter detection and validation
 - **Team Collaboration**: Centralized prompt management for your entire team
 - **Production Ready**: Battle-tested with secure API key storage
@@ -22,6 +23,7 @@ test, and optimize their AI prompts without deploying code changes.
 - 🎯 **Smart Prompt Management**: Create and organize prompts with slug-based identification
 - 📝 **Version Control**: Automatic versioning with one-click rollback
 - 🔍 **Variable Detection**: Auto-detects `{{variables}}` and creates typed parameters
+- 📎 **File Support**: Upload PDFs and images (JPG, PNG, GIF, WebP) as prompt parameters
 - 🧪 **Playground**: Test prompts with real AI providers before deploying
 - 📊 **Evaluation Suite**: Create test cases and measure prompt performance
 - 🔐 **Secure**: Encrypted API key storage using Rails encryption
@@ -285,6 +287,12 @@ rendered = PromptEngine.render("customer-support",
   issue: "Can't login to my account"
 )
 
+# Render a prompt with file uploads
+rendered = PromptEngine.render("document-analysis",
+  analysis_request: "Summarize the key points",
+  document: uploaded_file  # File object (PDF, JPG, PNG, GIF, WebP)
+)
+
 # Access rendered content
 rendered.content         # => "Hello John, I understand you're having trouble..."
 rendered.system_message  # => "You are a helpful customer support agent..."
@@ -323,9 +331,11 @@ For complete parameter access documentation, see [docs/VARIABLE_ACCESS.md](docs/
 
 1. **Create Prompts**: Use the admin UI to create prompts with `{{variables}}`
 2. **Auto-Detection**: PromptEngine automatically detects variables and creates parameters
-3. **Version Control**: Every save creates a new version automatically
-4. **Test & Deploy**: Test in the playground, then use in your application
-5. **Monitor**: Track usage and performance through the dashboard
+3. **Configure Parameters**: Set parameter types including text, number, boolean, and file
+4. **File Upload**: Upload PDFs and images directly in the playground for multi-modal prompts
+5. **Version Control**: Every save creates a new version automatically
+6. **Test & Deploy**: Test in the playground, then use in your application
+7. **Monitor**: Track usage and performance through the dashboard
 
 ## API Documentation
 
@@ -337,11 +347,17 @@ Renders a prompt template with the given variables.
 
 - `slug` (String): The unique identifier for the prompt
 - `**options` (Hash): Variables and optional overrides
-  - Variables: Any key-value pairs matching prompt variables
+  - Variables: Any key-value pairs matching prompt variables (including file uploads)
   - `model`: Override the default model
   - `temperature`: Override the default temperature
   - `max_tokens`: Override the default max tokens
   - `version`: Load a specific version number
+
+**File Parameters:**
+- Supported file types: PDF, JPG, PNG, GIF, WebP
+- Pass File objects or uploaded files as parameter values
+- Files are automatically processed and included in the LLM request
+- **PDF Support**: PDFs are currently only supported on Claude 3+ and Gemini models ([see RubyLLM documentation](https://rubyllm.com/guides/chat#working-with-pdfs))
 
 **Returns:** `PromptEngine::RenderedPrompt` instance
 
