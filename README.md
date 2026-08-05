@@ -321,7 +321,6 @@ The gem is available as open source under the terms of the
 ## Support
 
 - 🚀 [Live Demo App](https://prompt-engine-demo.avi.nyc)
-- 📖 [Documentation](https://prompt-engine-docs.avi.nyc/)
 - 🐛 [Issue Tracker](https://github.com/aviflombaum/prompt_engine/issues)
 - 💬 [Discussions](https://github.com/aviflombaum/prompt_engine/discussions)
 - 📧 [Email Support](mailto:ruby@avi.nyc)
