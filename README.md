@@ -14,7 +14,6 @@ PromptEngine is currently being worked on actively to prepare for a proper initi
 ## Documentation and Demo
 
 - 🚀 [Live Demo App](https://prompt-engine-demo.avi.nyc)
-- 📖 [Documentation](https://prompt-engine-docs.avi.nyc/)
 
 ## Why PromptEngine?
 
