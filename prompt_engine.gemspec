@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails"
   spec.add_dependency "ruby_llm"
   spec.add_dependency "bcrypt"
-  spec.add_dependency "sqlite3"
   spec.add_dependency "csv", "~> 3.3"
 
   spec.add_development_dependency "rspec-rails", "~> 7.0"
@@ -32,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "cuprite", "~> 0.15"
   spec.add_development_dependency "selenium-webdriver", "~> 4.27"
   spec.add_development_dependency "simplecov"
+  spec.add_development_dependency "sqlite3"
 end

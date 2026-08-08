@@ -6,7 +6,6 @@ PATH
       csv (~> 3.3)
       rails
       ruby_llm
-      sqlite3
 
 GEM
   remote: https://rubygems.org/
