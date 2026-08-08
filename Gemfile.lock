@@ -121,7 +121,7 @@ GEM
     factory_bot_rails (6.5.0)
       factory_bot (~> 6.5)
       railties (>= 6.1.0)
-    faraday (2.13.4)
+    faraday (2.14.0)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -147,7 +147,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.13.2)
+    json (2.15.2)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -159,12 +159,12 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.0.4)
+    marcel (1.1.0)
     matrix (0.4.3)
     mini_mime (1.1.5)
     minitest (5.25.5)
     multipart-post (2.4.1)
-    net-http (0.6.0)
+    net-http (0.7.0)
       uri
     net-imap (0.5.9)
       date
@@ -291,7 +291,7 @@ GEM
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
     ruby-progressbar (1.13.0)
-    ruby_llm (1.6.4)
+    ruby_llm (1.9.1)
       base64
       event_stream_parser (~> 1)
       faraday (>= 1.10.0)
@@ -299,7 +299,9 @@ GEM
       faraday-net_http (>= 1)
       faraday-retry (>= 1)
       marcel (~> 1.0)
+      ruby_llm-schema (~> 0.2.1)
       zeitwerk (~> 2)
+    ruby_llm-schema (0.2.1)
     rubyzip (3.0.2)
     securerandom (0.4.1)
     selenium-webdriver (4.35.0)
@@ -324,7 +326,7 @@ GEM
     unicode-display_width (3.1.5)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
-    uri (1.0.3)
+    uri (1.1.1)
     useragent (0.16.11)
     vcr (6.3.1)
       base64
