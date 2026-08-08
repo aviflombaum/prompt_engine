@@ -58,5 +58,51 @@ module PromptEngine
     def [](slug)
       find(slug)
     end
+
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    # Configures the PromptEngine by yielding the current configuration object.
+    # If no configuration exists, a new Configuration instance is created.
+    #
+    # @yieldparam [Configuration] configuration The configuration object to be modified.
+    # @return [void]
+    def configure
+      self.configuration ||= Configuration.new
+      yield(configuration)
+    end
+
+    # Configuration class manages model selection options for the prompt engine.
+    #
+    # Attributes:
+    #   options_for_model_select [Array<Array<String>>]: An array of pairs, where each pair contains
+    #     the display name and the identifier for a supported AI model.
+    #
+    # Examples:
+    #   PromptEngine.configure do |config|
+    #     config.options_for_model_select << ["New Model", "new-model-id"]
+    #   end
+    #
+    #   PromptEngine.configure do |config|
+    #     config.options_for_model_select = ["New Model", "new-model-id", ...]
+    #   end
+    #
+    # Usage:
+    #   Use this class to retrieve or modify the available model options for selection in the application.
+    class Configuration
+      attr_accessor :options_for_model_select
+
+      def initialize
+        @options_for_model_select = [
+          ["GPT-4", "gpt-4"],
+          ["GPT-4 Turbo", "gpt-4-turbo-preview"],
+          ["GPT-3.5 Turbo", "gpt-3.5-turbo"],
+          ["Claude 3 Opus", "claude-3-opus"],
+          ["Claude 3 Sonnet", "claude-3-sonnet"],
+          ["Claude 3 Haiku", "claude-3-haiku"]
+        ]
+      end
+    end
   end
 end
