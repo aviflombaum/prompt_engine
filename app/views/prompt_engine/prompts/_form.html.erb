@@ -12,7 +12,7 @@
 
   <div class="form__group">
     <%= form.label :name, class: "form__label form__label--required" %>
-    <%= form.text_field :name, class: "form__input", required: true, 
+    <%= form.text_field :name, class: "form__input", required: true,
         placeholder: "e.g., Customer Support Response",
         data: { action: "input->slug-generator#generateSlug" } %>
     <div class="form__help">A descriptive name for this prompt</div>
@@ -20,7 +20,7 @@
 
   <div class="form__group">
     <%= form.label :slug, class: "form__label form__label--required" %>
-    <%= form.text_field :slug, class: "form__input", required: true, 
+    <%= form.text_field :slug, class: "form__input", required: true,
         placeholder: "e.g., customer-support-response",
         data: { "slug-generator-target": "slugField" } %>
     <div class="form__help">URL-friendly identifier (lowercase letters, numbers, and hyphens only)</div>
@@ -35,7 +35,8 @@
   <div class="form__group">
     <%= form.label :system_message, "System Message", class: "form__label" %>
     <%= form.text_area :system_message, class: "form__textarea", rows: 4,
-        placeholder: "Instructions for the AI system (optional)" %>
+        placeholder: "Instructions for the AI system (optional)",
+        data: { action: "input->variable-detector-system#detectVariables" } %>
     <div class="form__help">Sets the behavior and context for the AI</div>
   </div>
 
@@ -50,11 +51,11 @@
   <div id="parameters-section" class="parameters-section" style="display: none;">
     <h3 class="form__section-title">Parameters</h3>
     <div class="form__help mb-md">Configure the parameters detected in your prompt:</div>
-    
+
     <div id="parameters-list" class="parameters-list">
       <!-- Parameters will be dynamically inserted here -->
     </div>
-    
+
     <%= form.fields_for :parameters do |parameter_form| %>
       <div class="parameter-fields" style="display: none;">
         <%= parameter_form.hidden_field :id %>
@@ -66,7 +67,7 @@
   <div class="form__inline">
     <div class="form__group">
       <%= form.label :model, "AI Model", class: "form__label" %>
-      <%= form.select :model, 
+      <%= form.select :model,
           options_for_select([
             ["GPT-4", "gpt-4"],
             ["GPT-4 Turbo", "gpt-4-turbo-preview"],
@@ -81,14 +82,14 @@
 
     <div class="form__group">
       <%= form.label :temperature, class: "form__label" %>
-      <%= form.number_field :temperature, class: "form__input", 
+      <%= form.number_field :temperature, class: "form__input",
           step: 0.1, min: 0, max: 2, placeholder: "0.7" %>
       <div class="form__help">0-2 (default: 0.7)</div>
     </div>
 
     <div class="form__group">
       <%= form.label :max_tokens, "Max Tokens", class: "form__label" %>
-      <%= form.number_field :max_tokens, class: "form__input", 
+      <%= form.number_field :max_tokens, class: "form__input",
           min: 1, placeholder: "500" %>
       <div class="form__help">Maximum response length</div>
     </div>
@@ -96,7 +97,7 @@
 
   <div class="form__group">
     <%= form.label :status, class: "form__label" %>
-    <%= form.select :status, 
+    <%= form.select :status,
         options_for_select([
           ["Draft", "draft"],
           ["Active", "active"],
@@ -108,7 +109,7 @@
 
   <div class="form__actions">
     <%= link_to "Cancel", prompts_path, class: "btn btn--secondary btn--medium" %>
-    <%= form.submit prompt.new_record? ? "Create Prompt" : "Update Prompt", 
+    <%= form.submit prompt.new_record? ? "Create Prompt" : "Update Prompt",
         class: "btn btn--primary btn--medium" %>
   </div>
 <% end %>
@@ -117,13 +118,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const contentField = document.querySelector('[data-action="input->variable-detector#detectVariables"]');
+  const systemField = document.querySelector('[data-action="input->variable-detector-system#detectVariables"]');
   const parametersSection = document.getElementById('parameters-section');
   const parametersList = document.getElementById('parameters-list');
-  
+
   // Slug generation
   const nameField = document.querySelector('[data-action="input->slug-generator#generateSlug"]');
   const slugField = document.querySelector('[data-slug-generator-target="slugField"]');
-  
+
   if (nameField && slugField) {
     function generateSlug() {
       // Only auto-generate if slug is empty or if it's a new record
@@ -137,10 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
         slugField.value = slug;
       }
     }
-    
+
     nameField.addEventListener('input', generateSlug);
   }
-  
+
   // Store existing parameters data (for edit form)
   const existingParameters = <%= raw((prompt.persisted? ? prompt.parameters : []).map { |p| {
     name: p.name,
@@ -150,13 +152,14 @@ document.addEventListener('DOMContentLoaded', function() {
     default_value: p.default_value,
     id: p.id
   }}.to_json) %>;
-  
+
   function detectVariables() {
     const content = contentField.value;
+    const system = systemField.value;
     const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\}\}/g;
-    const matches = [...content.matchAll(variablePattern)];
+    const matches = [...content.matchAll(variablePattern), ...system.matchAll(variablePattern)];
     const uniqueVariables = [...new Set(matches.map(match => match[1]))];
-    
+
     if (uniqueVariables.length > 0) {
       parametersSection.style.display = 'block';
       updateParametersDisplay(uniqueVariables);
@@ -164,17 +167,17 @@ document.addEventListener('DOMContentLoaded', function() {
       parametersSection.style.display = 'none';
     }
   }
-  
+
   function updateParametersDisplay(variables) {
     parametersList.innerHTML = '';
-    
+
     // Add fields for parameters that should be kept
     variables.forEach((variable, index) => {
       const existingParam = existingParameters.find(p => p.name === variable);
       const parameterItem = createParameterItem(variable, index, existingParam);
       parametersList.appendChild(parameterItem);
     });
-    
+
     // Add hidden fields to destroy parameters that are no longer in content
     let destroyIndex = variables.length;
     existingParameters.forEach(param => {
@@ -190,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
+
   function createParameterItem(variableName, index, existingData) {
     const div = document.createElement('div');
     div.className = 'parameter-item';
@@ -201,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <input type="hidden" name="prompt[parameters_attributes][${index}][name]" value="${variableName}">
         ${existingData ? `<input type="hidden" name="prompt[parameters_attributes][${index}][id]" value="${existingData.id}">` : ''}
       </div>
-      
+
       <div class="parameter-field">
         <label>Type</label>
         <select name="prompt[parameters_attributes][${index}][parameter_type]" class="form__select form__select--small">
@@ -212,31 +215,31 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value="object" ${existingData?.parameter_type === 'object' ? 'selected' : ''}>Object</option>
         </select>
       </div>
-      
+
       <div class="parameter-field">
         <label>Required</label>
         <div class="parameter-checkbox">
           <input type="hidden" name="prompt[parameters_attributes][${index}][required]" value="0">
-          <input type="checkbox" 
-                 name="prompt[parameters_attributes][${index}][required]" 
+          <input type="checkbox"
+                 name="prompt[parameters_attributes][${index}][required]"
                  value="1"
                  ${existingData?.required !== false ? 'checked' : ''}>
         </div>
       </div>
-      
+
       <div class="parameter-field">
         <label>Default Value</label>
-        <input type="text" 
-               name="prompt[parameters_attributes][${index}][default_value]" 
+        <input type="text"
+               name="prompt[parameters_attributes][${index}][default_value]"
                class="form__input form__input--small"
                placeholder="Optional"
                value="${existingData?.default_value || ''}">
       </div>
-      
+
       <div class="parameter-field">
         <label>Description</label>
-        <input type="text" 
-               name="prompt[parameters_attributes][${index}][description]" 
+        <input type="text"
+               name="prompt[parameters_attributes][${index}][description]"
                class="form__input form__input--small"
                placeholder="Optional"
                value="${existingData?.description || ''}">
@@ -244,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     return div;
   }
-  
+
   if (contentField) {
     contentField.addEventListener('input', detectVariables);
     // Detect variables on page load

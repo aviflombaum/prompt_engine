@@ -64,7 +64,7 @@ module PromptEngine
     # Parameter management methods
     def detect_variables
       # Don't cache the detector as content can change
-      PromptEngine::VariableDetector.new(content).variable_names
+      PromptEngine::VariableDetector.new(content + system_message.to_s).variable_names
     end
 
     def sync_parameters!
@@ -76,7 +76,7 @@ module PromptEngine
       if new_vars.any?
         # Get max position once, before the loop
         max_position = parameters.maximum(:position) || 0
-        detector = PromptEngine::VariableDetector.new(content)
+        detector = PromptEngine::VariableDetector.new(content + system_message.to_s)
 
         new_vars.each_with_index do |var_name, index|
           var_info = detector.extract_variables.find { |v| v[:name] == var_name }
@@ -101,7 +101,8 @@ module PromptEngine
     end
 
     def render_with_params(provided_params = {})
-      detector = PromptEngine::VariableDetector.new(content)
+      content_detector = PromptEngine::VariableDetector.new(content)
+      system_message_detector = PromptEngine::VariableDetector.new(system_message)
 
       # Validate all required parameters are provided
       validation = validate_parameters(provided_params)
@@ -125,8 +126,8 @@ module PromptEngine
       end
 
       {
-        content: detector.render(casted_params),
-        system_message: system_message,
+        content: content_detector.render(casted_params),
+        system_message: system_message_detector.render(casted_params),
         model: model,
         temperature: temperature,
         max_tokens: max_tokens,
@@ -183,12 +184,12 @@ module PromptEngine
       version = versions.find_by!(version_number: version_number)
 
       # Use version's content and settings
-      detector = PromptEngine::VariableDetector.new(version.content)
-      rendered_content = detector.render(variables)
+      content_detector = PromptEngine::VariableDetector.new(version.content)
+      system_message_detector = PromptEngine::VariableDetector.new(version.system_message)
 
       rendered_data = {
-        content: rendered_content,
-        system_message: version.system_message,
+        content: content_detector.render(variables),
+        system_message: system_message_detector.render(variables),
         model: version.model,
         temperature: version.temperature,
         max_tokens: version.max_tokens,

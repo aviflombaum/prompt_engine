@@ -3,7 +3,10 @@ module PromptEngine
     before_action :set_prompt
 
     def show
-      @parameters = ParameterParser.new(@prompt.content).extract_parameters.map { |p| p[:name] }
+      @parameters = ParameterParser.new(
+        @prompt.content + @prompt.system_message.to_s
+      ).extract_parameters.map { |p| p[:name] }
+
       @settings = Setting.instance
     end
 
@@ -24,8 +27,11 @@ module PromptEngine
         @provider = result[:provider]
 
         # Store the rendered prompt for display
-        parser = ParameterParser.new(@prompt.content)
-        @rendered_prompt = parser.replace_parameters(params[:parameters])
+        content_parser = ParameterParser.new(@prompt.content)
+        system_parser = ParameterParser.new(@prompt.system_message.to_s)
+
+        @rendered_prompt = content_parser.replace_parameters(params[:parameters])
+        @rendered_system_prompt = system_parser.replace_parameters(params[:parameters])
 
         # Save the playground run result
         @prompt.current_version.playground_run_results.create!(

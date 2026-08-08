@@ -507,6 +507,19 @@ RSpec.describe PromptEngine::Prompt, type: :model do
           expect(result[:error]).to include("item_count must be at most 150")
         end
       end
+
+      context "with parameters in the system_message" do
+        before do
+          prompt.update!(system_message: "Use this input schema {{input_schema}}")
+        end
+
+        it "renders variables in the system_message as well" do
+          result = prompt.render_with_params(name: "Alice", item_count: "10", input_schema: "object:schema")
+
+          expect(result[:content]).to eq("Hello Alice, you have 10 items")
+          expect(result[:system_message]).to eq("Use this input schema object:schema")
+        end
+      end
     end
 
     describe "#validate_parameters" do
